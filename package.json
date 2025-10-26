@@ -1,0 +1,19 @@
+{
+  "name": "test",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@types/dockerode": "^3.3.45",
+    "@types/express": "^5.0.4",
+    "dockerode": "^4.0.9",
+    "express": "^5.1.0",
+    "http-proxy-middleware": "^3.0.5"
+  }
+}
