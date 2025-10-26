@@ -42,6 +42,28 @@ app.post("/spawn", async (req, res) => {
   }
 });
 
+app.post("/stop/:id", async (req, res) => {
+  const id = req.params.id;
+  const containerInfo = activeContainers.get(id);
 
+  if (!containerInfo) {
+    return res.status(404).json({ error: "Container not found" });
+  }
+
+  try {
+    const container = docker.getContainer(id);
+
+    await container.stop().catch(() => {});
+
+    await container.remove().catch(() => {});
+
+    activeContainers.delete(id);
+
+    res.json({ message: `Container ${id} stopped and removed successfully` });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to stop/remove container" });
+  }
+});
 
 app.listen(8080, () => console.log("Server running on port 8080"));
