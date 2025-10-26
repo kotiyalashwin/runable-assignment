@@ -16,6 +16,7 @@ const getRandomPort = (): number => 5000 + Math.floor(Math.random() * 1000);
 
 app.post("/spawn", async (req, res) => {
   try {
+        const TRAEFIK_NETWORK = "traefik_traefik-net"
     const port = getRandomPort();
     const containerName = `react-app-${Date.now()}`;
         const subdomain = `app-${Date.now()}.localhost`;
@@ -27,6 +28,14 @@ const container = await docker.createContainer({
       [`traefik.http.routers.${containerName}.rule`]: `Host(\`${subdomain}\`)`,
       [`traefik.http.services.${containerName}.loadbalancer.server.port`]: "5173",
     },
+HostConfig: {
+    NetworkMode: TRAEFIK_NETWORK, // <--- attach to the traefik network
+  },
+  NetworkingConfig: {
+    EndpointsConfig: {
+      [TRAEFIK_NETWORK]: {},
+    },
+  },
     Cmd : ["/compile_page.sh"]
   });
     await container.start();
@@ -35,8 +44,7 @@ const container = await docker.createContainer({
     activeContainers.set(id, { id, name: containerName, port, createdAt: Date.now() });
 
     // Return a clean URL
-    const url = `http://localhost:${port}`;
-    res.json({ id, subdomain });
+    res.json({ id, preview : subdomain });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to start container" });
