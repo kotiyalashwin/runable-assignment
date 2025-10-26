@@ -18,16 +18,17 @@ app.post("/spawn", async (req, res) => {
   try {
     const port = getRandomPort();
     const containerName = `react-app-${Date.now()}`;
-    const container = await docker.createContainer({
-      Image: "react-base-image",
-      ExposedPorts: { "5173/tcp": {} },
-      HostConfig: {
-        PortBindings: { "5173/tcp": [{ HostPort: port.toString() }] },
-      },
-      name: containerName,
-      Cmd: ["/compile_page.sh"],
-    });
-
+        const subdomain = `app-${Date.now()}.localhost`;
+const container = await docker.createContainer({
+    Image: "react-sandbox",
+    ExposedPorts: { "5173/tcp": {} },
+    Labels: {
+      "traefik.enable": "true",
+      [`traefik.http.routers.${containerName}.rule`]: `Host(\`${subdomain}\`)`,
+      [`traefik.http.services.${containerName}.loadbalancer.server.port`]: "5173",
+    },
+    Cmd : ["/compile_page.sh"]
+  });
     await container.start();
 
     const id = container.id; // unique ID for this container
@@ -35,7 +36,7 @@ app.post("/spawn", async (req, res) => {
 
     // Return a clean URL
     const url = `http://localhost:${port}`;
-    res.json({ id, url });
+    res.json({ id, subdomain });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to start container" });
