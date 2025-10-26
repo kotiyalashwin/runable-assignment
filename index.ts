@@ -29,8 +29,7 @@ const container = await docker.createContainer({
       [`traefik.http.services.${containerName}.loadbalancer.server.port`]: "5173",
     },
 HostConfig: {
-    NetworkMode: TRAEFIK_NETWORK, // <--- attach to the traefik network
-  },
+    NetworkMode: TRAEFIK_NETWORK,   },
   NetworkingConfig: {
     EndpointsConfig: {
       [TRAEFIK_NETWORK]: {},
@@ -40,10 +39,8 @@ HostConfig: {
   });
     await container.start();
 
-    const id = container.id; // unique ID for this container
-    activeContainers.set(id, { id, name: containerName, port, createdAt: Date.now() });
+    const id = container.id;     activeContainers.set(id, { id, name: containerName, port, createdAt: Date.now() });
 
-    // Return a clean URL
     res.json({ id, preview : subdomain });
   } catch (err) {
     console.error(err);
